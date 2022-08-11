@@ -14,6 +14,7 @@ from py4godot.godot_bindings.binding cimport *
 from py4godot.godot_bindings.binding_external cimport *
 from py4godot.classes.generated cimport *
 from py4godot.enums.enums cimport *
+from py4godot.utils.print_tools import print
 import traceback
 
 from py4godot.pluginscript_api.utils.annotations import *
