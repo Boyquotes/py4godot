@@ -110,6 +110,8 @@ cdef api godot_pluginscript_instance_data * init_pluginscript_instance(godot_plu
             print("Exception:")
             print(e)
     Py_INCREF(instance)
+    #TODO: use method binding to fix this
+    #instanceMapper.register_script((<Object>instance).get_instance_id(), instance)
     return <PyObject*> instance
 
 cdef api void finish_pluginscript_instance(godot_pluginscript_instance_data *p_data) with gil:
