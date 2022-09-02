@@ -15,17 +15,31 @@ from py4godot.godot_bindings.binding_external cimport *
 from py4godot.classes.generated cimport *
 from py4godot.enums.enums cimport *
 from py4godot.utils.print_tools import print
+from py4godot.utils.InstancePyScriptMapper import get_instance_mapper
 import traceback
 
 from py4godot.pluginscript_api.utils.annotations import *
 from py4godot_core_holder.core_holder cimport get_core, get_nativescript
 
+cdef godot_method_bind *bind_object_get_instance_id
 
 """This file contains all the functions, that are needed to crate a pluginscript"""
 cdef godot_dictionary dictionary
 cdef api set_api_core_pluginscript(const godot_gdnative_core_api_struct* core):
     global api_core
     api_core = get_core()
+    bind_object_get_instance_id = api_core.godot_method_bind_get_method('Object', 'get_instance_id')
+
+cdef int get_instance_id(godot_object *_owner):
+
+    cdef int ret
+
+    assert api_core != NULL, 'api_core must not be NULL, unexpected error'
+    cdef void * args[1]
+    args[0] = NULL
+    api_core.godot_method_bind_ptrcall(bind_object_get_instance_id, _owner, args,&ret)
+    return ret
+
 cdef api godot_pluginscript_language_data * init_pluginscript() with gil:
     """empty placeholder function, as this is necessary to implement"""
 
@@ -111,7 +125,7 @@ cdef api godot_pluginscript_instance_data * init_pluginscript_instance(godot_plu
             print(e)
     Py_INCREF(instance)
     #TODO: use method binding to fix this
-    #instanceMapper.register_script((<Object>instance).get_instance_id(), instance)
+    get_instance_mapper().register_script(<int>(instance.godot_owner), instance)
     return <PyObject*> instance
 
 cdef api void finish_pluginscript_instance(godot_pluginscript_instance_data *p_data) with gil:
@@ -138,7 +152,6 @@ cdef api godot_variant call_method_pluginscript_instance(godot_pluginscript_inst
 const godot_variant **p_args,int p_argcount, godot_variant_call_error *r_error) with gil:
         """function for calling methods defined in the manifest from an external source"""
         method_name = str(StringName.new_static(p_method))
-
         cdef Wrapper instance = (<Wrapper>p_data)
         if(hasattr(instance,method_name)): #checking if function exists
             args = []
