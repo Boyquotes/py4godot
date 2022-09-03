@@ -1,2 +1,2 @@
 class Wrapper:
-    pass
+    def get_pyscript(self)->object: pass

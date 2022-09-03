@@ -132,6 +132,7 @@ cdef api void finish_pluginscript_instance(godot_pluginscript_instance_data *p_d
     """This method is for dereferencing the instance, when godot says it can be deleted """
     cdef Wrapper instance
     instance = (<Wrapper ?>p_data)
+    get_instance_mapper().unregister_script(<int>(instance.godot_owner))
     Py_DECREF(instance)
 
 cdef api bool set_prop_pluginscript_instance(godot_pluginscript_instance_data *p_data,
