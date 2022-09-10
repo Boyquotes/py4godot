@@ -341,6 +341,7 @@ cdef class PoolVector2Array:
 
 cdef class PoolVector3Array:
     def __init__(self):
+        self._index = 0
         self.update_event = UpdateEvent()
         api_core.godot_pool_vector3_array_new(&self._native)
 
@@ -349,6 +350,7 @@ cdef class PoolVector3Array:
       cdef PoolVector3Array array = PoolVector3Array.__new__(PoolVector3Array)
       api_core.godot_pool_vector3_array_new_copy(&array._native, &src._native)
       array.update_event = UpdateEvent()
+      array._index = 0
       return array
 
     @staticmethod
@@ -401,6 +403,17 @@ cdef class PoolVector3Array:
 
     def __setitem__(self, godot_int index,  Vector3 value):
         self.set(index, value)
+
+    def __iter__(self):
+        self._index = 0
+        return self
+
+    def __next__(self):
+        if self._index >= self.size():
+             raise StopIteration
+        val = self.get(self._index)
+        self._index += 1
+        return val
 
     def destroy(self):
       api_core.godot_pool_vector3_array_destroy(&self._native)

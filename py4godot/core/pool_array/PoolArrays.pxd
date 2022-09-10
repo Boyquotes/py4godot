@@ -45,6 +45,7 @@ cdef class PoolVector2Array:
 cdef class PoolVector3Array:
     cdef godot_pool_vector3_array _native
     cdef UpdateEvent update_event
+    cdef godot_int _index
 
     @staticmethod
     cdef inline void __new__(self, godot_pool_vector3_array _native):
