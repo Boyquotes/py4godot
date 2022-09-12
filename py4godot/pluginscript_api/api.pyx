@@ -65,7 +65,7 @@ cdef api  godot_pluginscript_script_manifest init_pluginscript_desc (godot_plugi
     try:
         result = exec_class(str(String.new_static(dereference(p_source))), str(String.new_static(dereference(p_path))))
     except Exception as e:
-        traceback.print_exc()
+        print(traceback.format_exc())
     if(result != None and (result.gd_class != None or result.gd_tool_class != None)):
         #creating a valid manifest
         gd_obj = result.gd_class if result.gd_class != None else result.gd_tool_class
@@ -122,7 +122,7 @@ cdef api godot_pluginscript_instance_data * init_pluginscript_instance(godot_plu
             setattr(instance,prop.name,prop.default_value)
         except Exception as e:
             print("Exception:")
-            print(e)
+            print(traceback.format_exc())
     Py_INCREF(instance)
     #TODO: use method binding to fix this
     get_instance_mapper().register_script(<int>(instance.godot_owner), instance)
@@ -172,7 +172,7 @@ const godot_variant **p_args,int p_argcount, godot_variant_call_error *r_error) 
                 print(getattr(instance,"signature_"+method_name))
                 print("Error in method:", method_name)
                 print("Instance:", instance)
-                traceback.print_exc()
+                print(traceback.format_exc())
 
         return CVariant.Variant()._native
 
