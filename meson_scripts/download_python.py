@@ -67,13 +67,8 @@ def extract_tar(file, export_name):
 def copy_to_build(export_folder, platform):
     """function for copying files to build folder"""
     if (not os.path.isdir(copy_dir +"/" + platform + "/" + export_folder)):
-        for i in range(2):
-            #TODO fix this why is a loop needed?
-            try:
-                copytree(python_files_dir +"/" + export_folder, copy_dir +"/" + platform + "/" + export_folder,
-                         ignore=ignore_patterns("build"), dirs_exist_ok=True) # build and lib are unnecessary
-            except Exception as e:
-                pass
+        copytree(python_files_dir +"/" + export_folder, copy_dir +"/" + platform + "/" + export_folder,
+                 ignore=ignore_patterns("build", "_vendor"), dirs_exist_ok=True) # build and lib are unnecessary
 
 def create_sitecustomization(export_folder, platform):
     if "windows" in platform:
