@@ -15,10 +15,13 @@ message('machine:'+machine)
 extra_args = []
 message(meson.get_compiler('c').get_id())
 
-add_global_arguments('/bigobj', language : 'c')
 
 if meson.get_compiler('c').get_id() == 'gcc'
     add_global_arguments('-DMS_WIN64', language : 'c')
+endif
+
+if meson.get_compiler('c').get_id() == 'msvc'
+    add_global_arguments('/bigobj', language : 'c')
 endif
 
 
