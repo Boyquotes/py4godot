@@ -156,6 +156,8 @@ const godot_variant **p_args,int p_argcount, godot_variant_call_error *r_error) 
         method_name = str(StringName.new_static(p_method))
         cdef Wrapper instance = (<Wrapper>p_data)
         if(hasattr(instance,method_name)): #checking if function exists
+            if("zoom" in method_name):
+                print("------------instance hast method----------------")
             args = []
             for i in range(0, p_argcount): #for loop for creating a list of arguments given to us by godot
                 variant=CVariant.Variant.new_static(dereference(p_args[i]))
@@ -170,7 +172,6 @@ const godot_variant **p_args,int p_argcount, godot_variant_call_error *r_error) 
                     return CVariant.Variant(ret)._native #Todo: return value
             except Exception as e:
                 print("#############")
-                print(getattr(instance,"signature_"+method_name))
                 print("Error in method:", method_name)
                 print("Instance:", instance)
                 print(traceback.format_exc())
