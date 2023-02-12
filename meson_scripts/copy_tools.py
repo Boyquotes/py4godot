@@ -8,7 +8,6 @@ with open('config.json', 'r') as f:
     config_data = json.load(f)
 
 def strip_platform(text):
-    print("strip_text:",text)
     text = text[1:]
     return text.lstrip("linux64").lstrip("windows64").lstrip("windows").lstrip("linux")
 
@@ -20,25 +19,31 @@ def run(platform):
     elif "linux" in platform:
         list_dll = glob.glob("**/*.so", recursive=True)
 
-    print("------------------------------------------copy------------------------------------------------\n")
-    print(list_dll)
     for entry in list_dll:
         entry = entry.lstrip("/")
         if entry.startswith("build_meson"):
-            os.makedirs(os.path.dirname(f"build/addons/{platform}/{config_data['python_ver']}-{platform}/python/install/Lib/site-packages/" + strip_platform(entry.lstrip("build_meson"))),
+            os.makedirs(os.path.dirname(f"build/addons/{platform}/{config_data['python_ver']}-{platform}/python/install/Lib/site-packages/" + strip_platform(entry.lstrip("build_meson").replace("#","/"))),
                         exist_ok=True)
-            copy(entry, f"build/addons/{platform}/{config_data['python_ver']}-{platform}/python/install/Lib/site-packages/" + strip_platform(entry.lstrip("build_meson")).
+            copy(entry, f"build/addons/{platform}/{config_data['python_ver']}-{platform}/python/install/Lib/site-packages/" + strip_platform(entry.lstrip("build_meson").replace("#","/")).
                  replace(".dll", ".pyd"))  # dst can be a folder; use copy2() to preserve timestamp
 
+    if "windows" in platform:
+        list_dll = glob.glob("**/*.pdb", recursive=True)
+    for entry in list_dll:
+        entry = entry.lstrip("/")
+        if entry.startswith("build_meson"):
+            os.makedirs(os.path.dirname(f"build/addons/{platform}/{config_data['python_ver']}-{platform}/python/install/Lib/site-packages/" + strip_platform(entry.lstrip("build_meson").replace("#", "/"))),
+                        exist_ok=True)
+            copy(entry, f"build/addons/{platform}/{config_data['python_ver']}-{platform}/python/install/Lib/site-packages/" + strip_platform(entry.lstrip("build_meson").replace("#", "/"))) # dst can be a folder; use copy2() to preserve timestamp
 
 def copy_main(platform):
     # Todo: check whether python39.dll can be in another path copying the main.pyd inside the python version,
     #  as the pythin39.dll must currently be in the same directory as main.pyd/main.so
     if "windows" in platform:
-        copy(f"build_meson/{platform}/py4godot/godot_bindings/main.dll",
-             f"build/addons/{platform}/{config_data['python_ver']}-{platform}/python/install/main.pyd")
+        copy(f"build_meson/{platform}/py4godot#godot_bindings#main.dll",
+             f"build/addons/{platform}/{config_data['python_ver']}-{platform}/python/install/main.dll")
     elif "linux" in platform:
-        copy(f"build_meson/{platform}/py4godot/godot_bindings/main.so",
+        copy(f"build_meson/{platform}/py4godot#godot_bindings#main.so",
              f"build/addons/{platform}/{config_data['python_ver']}-{platform}/main.so")
 
 
@@ -63,13 +68,10 @@ def copy_c_into_cache(platform):
         os.makedirs(os.path.dirname(dir_path), exist_ok=True)
         copy(entry, dir_path )
 
-    print(glob.glob("**/*.dll", recursive=True))
     beginning_path = config_data["meson_dir"]+f"\\{platform}\\"+"py4godot"
     l = [i for i in glob.glob("**/*.dll", recursive=True) if i.startswith(beginning_path) ]
     for entry in l:
-        print("entry found:",entry)
         dir_path = config_data["build_cache"]+"/"+platform+"/py4godot/"+entry.replace(beginning_path,"")
-        print("copy_to:",dir_path+"\n")
         os.makedirs(os.path.dirname(dir_path), exist_ok=True)
         copy(entry, dir_path )
 
@@ -80,8 +82,6 @@ def copy_stub_files(platform):
         os.makedirs(os.path.dirname(f"build/addons/{platform}/{config_data['python_ver']}-{platform}/python/install/Lib/site-packages/" + file),
                     exist_ok=True)
         copy(file, f"build/addons/{platform}/{config_data['python_ver']}-{platform}/python/install/Lib/site-packages/" + file)
-
-        print(f"build/addons/{platform}/{config_data['python_ver']}-{platform}/python/install/Lib/site-packages/" + file)
 
 
 if __name__ == "__main__":
