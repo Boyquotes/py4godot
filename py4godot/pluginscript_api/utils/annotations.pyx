@@ -4,9 +4,12 @@ from py4godot.pluginscript_api.description_classes.MethodDescription import Meth
 from py4godot.pluginscript_api.description_classes.PropertyDescription import PropertyDescription
 from py4godot.enums.enums cimport *
 from py4godot.pluginscript_api.hints.BaseHint cimport *
+from py4godot.utils.print_tools import print
 
 import sys,os
 import inspect
+import importlib
+from importlib.machinery import SourceFileLoader
 
 """annotations used to define all the godot members"""
 
@@ -26,7 +29,12 @@ def exec_class(source_string, class_name_):
     properties = []
     signals = []
     class_name = class_name_.split("/")[-1].replace(".py", "")
-    exec(source_string, locals())
+    try:
+        module_name = class_name_.replace("res://", "")+".py"
+        module = SourceFileLoader(class_name_.replace(".py", "").replace("res://", "").replace("/","."),
+        class_name_.replace("res://", "")).load_module()
+    except Exception as e:
+        print("An Exception while loading a script:", e)
     return TransferObject(methods, gd_class, gd_tool_class, properties, signals)
 
 
@@ -59,10 +67,11 @@ def gdtool(cls):
         return cls
 
 def prop(name,type_, defaultval, hint = BaseHint(), hint_string = ""):
+    print("before_prop")
     properties.append(PropertyDescription(name = name,
                 type_=type_,hint = hint,usage = godot_property_usage_flags.GODOT_PROPERTY_USAGE_DEFAULT,
                 default_value=defaultval, rset_mode=godot_method_rpc_mode.GODOT_METHOD_RPC_MODE_DISABLED))
-
+    print("after_prop:", properties)
 def gdproperty(type_, defaultval, hint = BaseHint(), hint_string = ""):
     class gdprop(property):
         def __init__(self,fget=None, fset=None, fdel=None, doc=None):
